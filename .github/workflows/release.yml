@@ -64,15 +64,15 @@ jobs:
       # 'pnpm run zip' (wxt zip) automatically runs build before packaging.
       # The RELEASE_VERSION env var is read by wxt.config.ts for both build and zip.
       - name: Build and Package
-        if: steps.version.outputs.skip == 'false'
-        env:
-          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        # if: steps.version.outputs.skip == 'false'
+        # env:
+        #   RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: pnpm run zip
 
       # Step 3: Execute actual release
       # semantic-release will update version, create changelog, commit, tag, and publish
       - name: Release
-        if: steps.version.outputs.skip == 'false' && github.event.inputs.dry-run == 'false'
+        # if: steps.version.outputs.skip == 'false' && github.event.inputs.dry-run == 'false'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec semantic-release
