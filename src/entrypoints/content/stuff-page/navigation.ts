@@ -65,8 +65,9 @@ export function extractMediaInfoFromJslog(jslog: string | null): MediaInfo | nul
  * Handle "Open in New Tab" button click
  * 
  * @param cardElement The library-item-card element
+ * @param openInBackground Whether to open the tab in the background without focusing it
  */
-export function handleOpenInNewTab(cardElement: Element): void {
+export function handleOpenInNewTab(cardElement: Element, openInBackground: boolean = false): void {
   try {
     // Extract jslog attribute
     const jslog = cardElement.getAttribute('jslog')
@@ -126,7 +127,16 @@ export function handleOpenInNewTab(cardElement: Element): void {
     })
 
     // Open in new tab
-    window.open(url, '_blank')
+    if (openInBackground) {
+      // Send message to background script to open tab without focusing
+      browser.runtime.sendMessage({ action: 'openBackgroundTab', url }).catch((err) => {
+        console.error('[Navigation] Error sending message to background script:', err)
+        // Fallback
+        window.open(url, '_blank')
+      })
+    } else {
+      window.open(url, '_blank')
+    }
   } catch (error) {
     console.error('[Navigation] Error opening in new tab:', error)
   }

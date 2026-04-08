@@ -62,11 +62,23 @@ function injectButton(card: Element): void {
   button.setAttribute('tabindex', '0')
   button.setAttribute('aria-label', t('stuffPage.openInNewTab'))
 
-  // Add click handler
+  // Add click handler (left click)
   button.addEventListener('click', (e) => {
     e.preventDefault()
     e.stopPropagation()
-    handleOpenInNewTab(card)
+    // Open in background if Ctrl/Cmd is pressed
+    const openInBackground = e.ctrlKey || e.metaKey
+    handleOpenInNewTab(card, openInBackground)
+  })
+
+  // Add auxclick handler (middle click)
+  button.addEventListener('auxclick', (e) => {
+    if (e.button === 1) { // 1 is middle button
+      e.preventDefault()
+      e.stopPropagation()
+      // Middle click always opens in background
+      handleOpenInNewTab(card, true)
+    }
   })
 
   // Add keyboard support (Enter and Space)
@@ -74,7 +86,8 @@ function injectButton(card: Element): void {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       e.stopPropagation()
-      handleOpenInNewTab(card)
+      const openInBackground = e.ctrlKey || e.metaKey
+      handleOpenInNewTab(card, openInBackground)
     }
   })
 
