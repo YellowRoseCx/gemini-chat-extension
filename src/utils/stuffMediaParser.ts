@@ -20,15 +20,16 @@
  * [4] Enable text summary (0=Media, 1=Docs)
  * [5] Reserved
  * [6] Enable resource ID
+ * [7] Unknown/new parameter added by Google API
  */
-export type StuffRequestTypeArray = [number, number, number, number, number, number, number];
+export type StuffRequestTypeArray = number[];
 
 /**
- * Stuff request type constants
+ * Stuff request type constants (prefixes to match against)
  */
 export const STUFF_REQUEST_TYPES = {
-  MEDIA: [1, 1, 1, 0, 0, 0, 1] as StuffRequestTypeArray,
-  DOCS: [1, 1, 1, 1, 1, 0, 1] as StuffRequestTypeArray,
+  MEDIA: [1, 1, 1, 0, 0, 0, 1],
+  DOCS: [1, 1, 1, 1, 1, 0, 1],
 } as const;
 
 /**
@@ -122,13 +123,21 @@ export interface ParsedMediaResponse {
  * @returns 'media' | 'docs' | null
  */
 export function identifyStuffRequestType(typeArray: number[]): 'media' | 'docs' | null {
-  if (typeArray.length !== 7) return null;
+  // Support both 7-element and new 8-element arrays from Google API
+  if (typeArray.length < 7 || typeArray.length > 8) return null;
 
-  if (arraysEqual(typeArray, STUFF_REQUEST_TYPES.MEDIA)) {
+  const isMatch = (expected: readonly number[]) => {
+    for (let i = 0; i < 7; i++) {
+      if (typeArray[i] !== expected[i]) return false;
+    }
+    return true;
+  };
+
+  if (isMatch(STUFF_REQUEST_TYPES.MEDIA)) {
     return 'media';
   }
 
-  if (arraysEqual(typeArray, STUFF_REQUEST_TYPES.DOCS)) {
+  if (isMatch(STUFF_REQUEST_TYPES.DOCS)) {
     return 'docs';
   }
 
